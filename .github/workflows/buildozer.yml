@@ -33,13 +33,21 @@ jobs:
           # Install required packages
           sdkmanager --install "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
 
-          # Explicitly add build-tools to PATH for AIDL
-          export PATH=$PATH:$ANDROID_HOME/build-tools/33.0.2
-
-          # Set environment variables
+          # Explicitly set ANDROID_HOME and add build-tools to PATH
           export ANDROID_HOME=$HOME/Android/Sdk
           export PATH=$PATH:$ANDROID_HOME/platform-tools
           export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+          export PATH=$PATH:$ANDROID_HOME/build-tools/33.0.2
+
+          # Verify AIDL is available
+          which aidl || echo "AIDL not found in PATH"
+          ls -l $ANDROID_HOME/build-tools/33.0.2/aidl || echo "AIDL binary not found"
+
+      - name: Debug AIDL
+        run: |
+          echo "PATH is: $PATH"
+          which aidl || echo "AIDL not found"
+          ls -l $ANDROID_HOME/build-tools/33.0.2/aidl || echo "AIDL binary not found"
 
       - name: Build with Buildozer
         run: |
