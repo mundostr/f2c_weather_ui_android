@@ -1,64 +1,26 @@
-name: Build Android APK
-on: [push]
+name: Buildozer
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo-dev cmake libffi-dev libssl-dev
-          pip install --upgrade pip
-          pip install buildozer cython==3.0.0 kivy
-
-      - name: Install Android SDK/NDK
-        run: |
-          # Install Android SDK command-line tools
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-          unzip -q cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
-          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-
-          # Accept licenses
-          yes | sdkmanager --licenses > /dev/null
-
-          # Install required packages
-          sdkmanager --install "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
-
-          # Explicitly set ANDROID_HOME and add build-tools to PATH
-          export ANDROID_HOME=$HOME/Android/Sdk
-          export PATH=$PATH:$ANDROID_HOME/platform-tools
-          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-          export PATH=$PATH:$ANDROID_HOME/build-tools/33.0.2
-
-          # Verify AIDL is available
-          which aidl || echo "AIDL not found in PATH"
-          ls -l $ANDROID_HOME/build-tools/33.0.2/aidl || echo "AIDL binary not found"
-
-      - name: Debug AIDL
-        run: |
-          echo "PATH is: $PATH"
-          which aidl || echo "AIDL not found"
-          ls -l $ANDROID_HOME/build-tools/33.0.2/aidl || echo "AIDL binary not found"
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Build with Buildozer
-        run: |
-          buildozer -v android debug
-        env:
-          ANDROIDNDKVER: 25b
-          ANDROIDSDKVER: 33
-          ANDROIDAPI: 33
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
 
-      - name: Upload APK
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-apk
-          path: bin/*.apk
+          name: package
+          path: ${{ steps.buildozer.outputs.filename }}
