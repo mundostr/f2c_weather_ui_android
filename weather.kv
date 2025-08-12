@@ -1,0 +1,38 @@
+#:kivy 2.1.0
+
+<WeatherUI>:
+    orientation: 'vertical'
+    padding: 50
+    spacing: 20
+
+    Label:
+        text: 'F2C Weather Station'
+        font_size: '24sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: '40dp'
+
+        Label:
+            text: 'Temperature:'
+            font_size: '18sp'
+        Label:
+            id: temp_label
+            text: root.temperature
+            font_size: '18sp'
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: '40dp'
+
+        Label:
+            text: 'Pressure:'
+            font_size: '18sp'
+        Label:
+            id: pres_label
+            text: root.pressure
+            font_size: '18sp'
